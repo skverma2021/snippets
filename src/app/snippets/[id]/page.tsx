@@ -35,3 +35,11 @@ export default async function NewSnippet(props: NewSnippetProps) {
         </pre>
     </div>;
 }
+export async function generateStaticParams() {
+    const snippets = await db.snippet.findMany({
+        select: { id: true },
+    });
+    return snippets.map((snippet) => ({
+        id: snippet.id.toString(),
+    }));
+}
