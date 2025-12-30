@@ -1,0 +1,49 @@
+'use server'
+import { db } from "@/db"
+import { redirect } from "next/navigation";
+
+export async function editSnippet(id: number, newCode: string) {
+    await db.snippet.update({
+        where: { id },
+        data: { code: newCode },
+    });
+    redirect(`/snippets/${id}`);
+}
+
+export async function deleteSnippet(id: number) {
+    await db.snippet.delete({
+        where: { id },
+    });
+    redirect('/');
+}
+
+export async function createSnippet(formState: { message: string }, data: FormData) {
+
+    try {
+        const title = data.get("title")
+        const code = data.get("code")
+        if (typeof title !== "string" || title.length < 3) {
+            return { message: "Title must be at least 3 characters long." }
+        }
+        if (typeof code !== "string" || code.length < 10) {
+            return { message: "Code cannot be empty." }
+        }
+        // throw new Error("Failed to create snippet.")
+        const snippet = await db.snippet.create({
+            data: {
+                title: String(title),
+                code: String(code),
+            }
+        })
+        console.log("Created snippet:", snippet)
+    }catch (err: unknown) {
+        if (err instanceof Error) {
+            return { message: err.message }
+        }else{
+            return { message: "An unknown error occurred." }
+        }
+    }
+
+
+    redirect('/')
+}
